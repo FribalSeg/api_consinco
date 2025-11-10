@@ -7,12 +7,12 @@ services:
       dockerfile: Dockerfile
     container_name: api_consinco
     ports:
-      - "${PORT:-8000}:8000"
+      - "${PORT:-8001}:8001"
     environment:
       - URL_LOGIN=${URL_LOGIN}
       - NOME=${NOME}
       - SENHA=${SENHA}
-      - PORT=8000
+      - PORT=8001
       - VALID_USERNAME=${VALID_USERNAME}
       - VALID_PASSWORD=${VALID_PASSWORD}
     volumes:
