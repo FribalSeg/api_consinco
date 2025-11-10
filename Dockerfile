@@ -22,4 +22,4 @@ ENV PYTHONPATH=/app
 EXPOSE 8001
 
 # Comando para executar a aplicação
-CMD ["python", "-m", "uvicorn", "api_fastapi:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]

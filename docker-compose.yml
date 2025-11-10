@@ -19,7 +19,7 @@ services:
       # Volume para persistir os tokens
       - ./tokens:/app/tokens
       # Volume para desenvolvimento (opcional - remova em produção)
-      - .:/app
+      # - .:/app
     restart: unless-stopped
     networks:
       - api_network

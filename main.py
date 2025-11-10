@@ -150,9 +150,4 @@ def root():
 # Executar servidor
 if __name__ == "__main__":
     # Para desenvolvimento
-    uvicorn.run(
-        app=app,
-        host="0.0.0.0",
-        port=int(PORT),
-        reload=True
-    )
+    uvicorn.run(app, host="0.0.0.0", port=8001)
