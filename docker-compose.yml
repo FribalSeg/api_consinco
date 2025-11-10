@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api_consinco
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      - URL_LOGIN=${URL_LOGIN}
+      - NOME=${NOME}
+      - SENHA=${SENHA}
+      - PORT=8000
+      - VALID_USERNAME=${VALID_USERNAME}
+      - VALID_PASSWORD=${VALID_PASSWORD}
+    volumes:
+      # Volume para persistir os tokens
+      - ./tokens:/app/tokens
+      # Volume para desenvolvimento (opcional - remova em produção)
+      - .:/app
+    restart: unless-stopped
+    networks:
+      - api_network
+
+networks:
+  api_network:
+    driver: bridge
