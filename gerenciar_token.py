@@ -4,6 +4,7 @@ import os
 from datetime import datetime, timedelta
 from typing import Optional, Dict
 import re
+import threading
 
 class GerenciadorToken:
     """
@@ -56,6 +57,7 @@ class GerenciadorToken:
         self.session = requests.Session()
         self._token_data: Optional[Dict] = None
         self._validade_token: Optional[datetime] = None
+        self._lock = threading.Lock()  # Mutex para garantir thread-safety
 
     def consulta_sql(self, sql_text: str) -> Optional[Dict]:
         """
@@ -227,26 +229,39 @@ class GerenciadorToken:
     def pegar_token_atualizado(self) -> Optional[Dict]:
         """
         Retorna um token válido, renovando-o se necessário.
+        Thread-safe: múltiplas requisições simultâneas usarão o mesmo token.
 
         Returns:
             Dict: Dados do token se válido, None caso contrário
         """
-        # Primeiro tenta carregar token salvo se não há token em memória
-        if self._token_data is None:
-            self.carregar_token_salvo()
-
-        # Verifica se o token atual já é válido
+        # Primeiro verifica se já tem um token válido sem lock (fast path)
         if self._token_e_valido():
             print(f'Token atual ainda é válido até: {self._validade_token}')
             return self._token_data
 
-        # Se chegou aqui, o token precisa ser renovado
-        if self._token_precisa_renovar():
-            print('Token expirado ou próximo do vencimento. Renovando...')
-            if not self._fazer_login():
-                return None
+        # Se precisar renovar ou carregar, usa lock para garantir que apenas uma thread faça isso
+        with self._lock:
+            # Double-check: outra thread pode ter renovado enquanto esperávamos o lock
+            if self._token_e_valido():
+                print(f'Token foi renovado por outra requisição. Válido até: {self._validade_token}')
+                return self._token_data
 
-        return self._token_data
+            # Primeiro tenta carregar token salvo se não há token em memória
+            if self._token_data is None:
+                self.carregar_token_salvo()
+
+            # Verifica novamente se o token atual já é válido após carregar
+            if self._token_e_valido():
+                print(f'Token carregado é válido até: {self._validade_token}')
+                return self._token_data
+
+            # Se chegou aqui, o token precisa ser renovado
+            if self._token_precisa_renovar():
+                print('Token expirado ou próximo do vencimento. Renovando...')
+                if not self._fazer_login():
+                    return None
+
+            return self._token_data
 
     def requisicao_get(self, url: str, params: Dict = None) -> Optional[requests.Response]:
         """
