@@ -151,7 +151,7 @@ def root():
 if __name__ == "__main__":
     # Para desenvolvimento
     uvicorn.run(
-        "api_fastapi:app",
+        app=app,
         host="0.0.0.0",
         port=int(PORT),
         reload=True
