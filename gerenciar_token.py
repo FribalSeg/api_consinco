@@ -58,10 +58,12 @@ class GerenciadorToken:
         self._token_data: Optional[Dict] = None
         self._validade_token: Optional[datetime] = None
         self._lock = threading.Lock()  # Mutex para garantir thread-safety
+        self._query_lock = threading.Lock()  # Mutex para serializar consultas SQL
 
     def consulta_sql(self, sql_text: str) -> Optional[Dict]:
         """
         Consulta SQL usando a API autenticada.
+        Thread-safe: apenas uma consulta é executada por vez, as demais aguardam em fila.
 
         Args:
             sql: Comando SQL a ser executado
@@ -69,31 +71,36 @@ class GerenciadorToken:
         Returns:
             Dict: Resultado da consulta SQL se bem-sucedido, None caso contrário
         """
-        session = self.obter_session_autenticada()
+        # Lock para garantir que apenas uma consulta seja executada por vez
+        with self._query_lock:
+            print(f'Executando consulta SQL (thread: {threading.current_thread().name})...')
 
-        body2 = """
-        {
-            "CommandText": "{SQL_TEXT}",
-            "ConnectionType": 0,
-            "Limit": null
-        }
-        """
+            session = self.obter_session_autenticada()
 
-        ss = requests.Session()
+            body2 = """
+            {
+                "CommandText": "{SQL_TEXT}",
+                "ConnectionType": 0,
+                "Limit": null
+            }
+            """
 
-        headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "Authorization": f"Bearer {self.pegar_token_atualizado()['access_token']}"
-        }
+            ss = requests.Session()
 
-        dados_objetos = ss.post(self.api_sql_url, data=body2.replace("{SQL_TEXT}", sql_text), headers=headers, verify=False)
+            headers = {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Authorization": f"Bearer {self.pegar_token_atualizado()['access_token']}"
+            }
 
-        if dados_objetos.status_code == 200:
-            return dados_objetos.json()
-        else:
-            print(f'Erro na consulta SQL: {dados_objetos.status_code}')
-            return None
+            dados_objetos = ss.post(self.api_sql_url, data=body2.replace("{SQL_TEXT}", sql_text), headers=headers, verify=False)
+
+            if dados_objetos.status_code == 200:
+                print(f'Consulta SQL concluída com sucesso (thread: {threading.current_thread().name})')
+                return dados_objetos.json()
+            else:
+                print(f'Erro na consulta SQL: {dados_objetos.status_code}')
+                return None
 
     def extrair_dominio(self, url: str) -> str:
         # remover protocolo, porta e path do url
