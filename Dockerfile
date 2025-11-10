@@ -15,8 +15,11 @@ COPY . .
 # Criar diretório para tokens
 RUN mkdir -p /app/tokens
 
+# Definir PYTHONPATH para garantir que os módulos sejam encontrados
+ENV PYTHONPATH=/app
+
 # Expor porta
-EXPOSE 8000
+EXPOSE 8001
 
 # Comando para executar a aplicação
-CMD ["uvicorn", "api_fastapi:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "uvicorn", "api_fastapi:app", "--host", "0.0.0.0", "--port", "8001"]
