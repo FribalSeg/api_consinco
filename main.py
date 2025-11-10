@@ -65,9 +65,9 @@ def verificar_autenticacao(credentials: HTTPBasicCredentials = Depends(security)
 
     return credentials.username
 
-# Endpoint de saúde
+# Endpoint de saúde (COM autenticação)
 @app.get("/health")
-def health_check():
+def health_check(username: str = Depends(verificar_autenticacao)):
     """Endpoint para verificar se a API está funcionando"""
     return {"status": "ok", "message": "API está funcionando"}
 
@@ -132,9 +132,9 @@ def status_token(username: str = Depends(verificar_autenticacao)):
             detail=f"Erro ao obter status do token: {str(e)}"
         )
 
-# Endpoint raiz
+# Endpoint raiz (COM autenticação)
 @app.get("/")
-def root():
+def root(username: str = Depends(verificar_autenticacao)):
     """Endpoint raiz com informações da API"""
     return {
         "message": "API SQL Consinco",
