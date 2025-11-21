@@ -9,7 +9,8 @@ services:
     ports:
       - "${PORT:-8001}:8001"
     environment:
-      - URL_LOGIN=${URL_LOGIN}
+      - URL_LOGIN_PROD=${URL_LOGIN_PROD}
+      - URL_LOGIN_DEV=${URL_LOGIN_DEV}
       - NOME=${NOME}
       - SENHA=${SENHA}
       - PORT=8001

@@ -33,9 +33,14 @@ class SQLResponse(BaseModel):
 # Configurações do gerenciador (pode ser movido para variáveis de ambiente)
 NOME = os.getenv('NOME')
 SENHA = os.getenv('SENHA')
-PORT= os.getenv('PORT', 8000)
+PORT= os.getenv('PORT', 8001)
+URL_PROD = os.getenv('URL_LOGIN_PROD', '')
+URL_DEV = os.getenv('URL_LOGIN_DEV', '')
 
 
+print('NOME: ' + NOME)
+print('PROD: ' + URL_PROD)
+print('DEV: ' + URL_DEV)
 
 class AmbientesEnum(str, Enum):
     PROD = "prod"
@@ -44,12 +49,12 @@ class AmbientesEnum(str, Enum):
 # Configuração dos ambientes
 AMBIENTES_CONFIG = {
     AmbientesEnum.PROD: {
-        "url": os.getenv('URL_LOGIN_PROD', ''),
+        "url": URL_PROD,
         "nome": os.getenv('NOME'),
         "senha": os.getenv('SENHA')
     },
     AmbientesEnum.DEV: {
-        "url": os.getenv('URL_LOGIN_DEV', ''),
+        "url": URL_DEV,
         "nome": os.getenv('NOME'),
         "senha": os.getenv('SENHA')
     }
