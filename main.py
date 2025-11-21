@@ -36,6 +36,7 @@ SENHA = os.getenv('SENHA')
 PORT= os.getenv('PORT', 8000)
 
 
+
 class AmbientesEnum(str, Enum):
     PROD = "prod"
     DEV = "dev"
